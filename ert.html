@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Ajban Solar PV | Emergency Action Plan & Escalation Chart</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #eef2f5;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            padding: 2rem 1.2rem;
+            color: #1a2c3e;
+        }
+
+        .plan-container {
+            max-width: 1300px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            padding: 2rem 2rem 2.2rem 2rem;
+        }
+
+        /* header */
+        .site-header {
+            border-bottom: 3px solid #1e6f3f;
+            padding-bottom: 1rem;
+            margin-bottom: 1.8rem;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+        .title h1 {
+            font-size: 1.7rem;
+            font-weight: 700;
+            color: #0b3b2f;
+        }
+        .title p {
+            color: #4a627a;
+            font-weight: 500;
+            margin-top: 0.2rem;
+        }
+        .version {
+            background: #e9f3eb;
+            padding: 0.4rem 1rem;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #1e6f3f;
+        }
+
+        /* simple chart section (replaces 8.1 leg chart - clean) */
+        .simple-chart {
+            background: #fafef7;
+            border-radius: 28px;
+            padding: 1.6rem 1.2rem;
+            margin-bottom: 2rem;
+            border: 1px solid #ddebe0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+        .chart-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #1c5a3a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 1.5rem;
+            border-left: 5px solid #2b7a3e;
+            padding-left: 1rem;
+        }
+        .escalation-flow {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+            align-items: stretch;
+            margin: 1rem 0 0.5rem;
+        }
+        .flow-card {
+            flex: 1;
+            min-width: 200px;
+            background: white;
+            border-radius: 28px;
+            padding: 1.2rem 1rem;
+            text-align: center;
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.03);
+            border: 1px solid #e2eedf;
+            transition: 0.2s;
+        }
+        .flow-card:hover {
+            transform: translateY(-3px);
+            border-color: #bdd0b5;
+        }
+        .level-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        .level-name {
+            font-weight: 800;
+            font-size: 1.2rem;
+            margin: 0.4rem 0;
+        }
+        .level-desc {
+            font-size: 0.85rem;
+            color: #4a5e6e;
+            margin: 0.5rem 0;
+            line-height: 1.4;
+        }
+        .level-trigger {
+            background: #f4f8f2;
+            border-radius: 30px;
+            padding: 0.3rem 0.6rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-top: 0.6rem;
+        }
+        .minor-bg { border-top: 4px solid #2b7a3e; }
+        .l1-bg { border-top: 4px solid #e68a2e; }
+        .l2-bg { border-top: 4px solid #c23b22; }
+        .arrow-symbol {
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            color: #8aaE8a;
+            font-weight: 300;
+        }
+        @media (max-width: 780px) {
+            .arrow-symbol { transform: rotate(90deg); margin: 0; }
+            .escalation-flow { flex-direction: column; align-items: center; }
+            .flow-card { width: 100%; }
+        }
+
+        /* full action plan sections */
+        .action-plan-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f4634;
+            margin: 1.5rem 0 1rem 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-left: 6px solid #2b7a3e;
+            padding-left: 1rem;
+        }
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.8rem;
+        }
+        .action-card {
+            background: #ffffff;
+            border-radius: 24px;
+            padding: 1.2rem 1.4rem;
+            border: 1px solid #e2ede2;
+            transition: all 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+        .action-card h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 0.8rem;
+            color: #1b5e3f;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .action-card ul, .action-card p {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: #2c4e62;
+            margin-left: 1rem;
+        }
+        .action-card li {
+            margin: 0.5rem 0;
+        }
+        .badge-step {
+            background: #edf4ea;
+            border-radius: 40px;
+            padding: 0.2rem 0.7rem;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #1d6b42;
+            display: inline-block;
+            margin-bottom: 0.6rem;
+        }
+        .emergency-contacts {
+            background: #f1f9f0;
+            border-radius: 24px;
+            padding: 1rem 1.4rem;
+            margin: 1rem 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 0.8rem;
+            font-size: 0.85rem;
+        }
+        .contact-item {
+            font-weight: 600;
+        }
+        hr {
+            margin: 0.8rem 0;
+            border-color: #d9e6d4;
+        }
+        .footer-note {
+            margin-top: 2rem;
+            font-size: 0.72rem;
+            text-align: center;
+            color: #5f7c6a;
+            border-top: 1px solid #dbe8dc;
+            padding-top: 1.2rem;
+        }
+        .highlight {
+            background: #fef7e0;
+            border-radius: 14px;
+            padding: 0.2rem 0.4rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+<div class="plan-container">
+    <!-- header -->
+    <div class="site-header">
+        <div class="title">
+            <h1>⚡ Ajban Solar PV Plant <span style="font-weight:400">Independent Power Project</span></h1>
+            <p>Emergency Response Action Plan & Simplified Escalation Chart</p>
+        </div>
+        <div class="version">🔄 Rev. Q2-2026 | Quarterly Update</div>
+    </div>
+
+    <!-- SIMPLE CHART (Leg chart style - without 8.1 heading) -->
+    <div class="simple-chart">
+        <div class="chart-title">
+            📊 Emergency Escalation Chart | Severity & Response Level
+        </div>
+        <div class="escalation-flow">
+            <!-- MINOR -->
+            <div class="flow-card minor-bg">
+                <div class="level-icon">🟢</div>
+                <div class="level-name">MINOR EVENT</div>
+                <div class="level-desc">Handled internally by site personnel. No external assistance required. Small incidents, first-aid only, minor spills, local repair.</div>
+                <div class="level-trigger">✅ Response: On-site team only</div>
+                <div style="margin-top: 8px; font-size:0.75rem;">Immediate containment by O&M staff</div>
+            </div>
+            <div class="arrow-symbol">→</div>
+            <!-- ESCALATION LEVEL 1 -->
+            <div class="flow-card l1-bg">
+                <div class="level-icon">🟠</div>
+                <div class="level-name">ESCALATION LEVEL 1</div>
+                <div class="level-desc">Local emergency services invited (fire, police, ambulance). Moderate severity: multiple injuries, small fire, limited evacuation zone.</div>
+                <div class="level-trigger">🚒 Local authorities respond + O&M Emergency Manager</div>
+                <div style="margin-top: 8px; font-size:0.75rem;">External support required, corporate not yet activated</div>
+            </div>
+            <div class="arrow-symbol">→</div>
+            <!-- ESCALATION LEVEL 2 -->
+            <div class="flow-card l2-bg">
+                <div class="level-icon">🔴</div>
+                <div class="level-name">ESCALATION LEVEL 2</div>
+                <div class="level-desc">Major / crisis event. Local authorities + Corporate Crisis Management Team (CMT) activated. Fatality, large fire, severe environmental impact, media attention.</div>
+                <div class="level-trigger">🏢 Local authorities + Corporate CMT activation</div>
+                <div style="margin-top: 8px; font-size:0.75rem;">Full strategic & tactical response</div>
+            </div>
+        </div>
+        <!-- simple decision questions (clean guidance) -->
+        <div style="background: #f4f9f2; border-radius: 20px; padding: 0.8rem 1.2rem; margin-top: 1.2rem;">
+            <div style="font-weight: 700; font-size:0.85rem;">❓ Quick escalation guide (decision triggers):</div>
+            <div style="display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 0.6rem; font-size:0.8rem;">
+                <span>▶ Can site team control? → <strong>MINOR</strong></span>
+                <span>▶ Need local fire/medical/police? → <strong>LEVEL 1</strong></span>
+                <span>▶ Beyond local capacity / life threat / crisis? → <strong>LEVEL 2 + CMT</strong></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== FULL ACTION PLAN ========== -->
+    <div class="action-plan-title">
+        🚨 FULL EMERGENCY ACTION PLAN | Immediate & Follow-up Actions
+    </div>
+
+    <div class="actions-grid">
+        <!-- 1. FIRST ACTIONS (witness) -->
+        <div class="action-card">
+            <div class="badge-step">STEP 1 · WITNESS</div>
+            <h3>🔔 Perform First Actions</h3>
+            <ul>
+                <li><strong>Alert</strong> Emergency Manager (O&M HSSE Manager) & Lead Site Engineer → state nature, location, injuries.</li>
+                <li><strong>Assess</strong> situation, identify dangers → move clear of hazard.</li>
+                <li>If safe → <strong>eliminate immediate danger</strong> (isolate energy, use extinguisher).</li>
+                <li><strong>Mark area</strong> to prevent secondary accidents.</li>
+                <li>Keep calm, protect yourself and coworkers.</li>
+                <li>Notify all affected personnel using alarm or voice.</li>
+                <li>Use <strong>Emergency Contact Sheet</strong> (posted at access points, offices, warehouse).</li>
+            </ul>
+            <div style="background:#f9faf4; border-radius: 14px; padding: 6px 8px; margin-top: 8px; font-size:0.75rem;">
+                📢 Emergency Manager makes walkie-talkie announcement to Emergency Group → all personnel proceed to assembly point.
+            </div>
+        </div>
+
+        <!-- 2. ALERT INTERNAL & EVACUATION -->
+        <div class="action-card">
+            <div class="badge-step">STEP 2 · INTERNAL ALERT</div>
+            <h3>📡 Alert Internal Contacts & Activate Evacuation</h3>
+            <ul>
+                <li><strong>Emergency Manager + Lead Site Engineer</strong> receive witness report.</li>
+                <li>Announcement via <strong>walkie-talkie emergency group</strong> → incident details & evacuation order if needed.</li>
+                <li>Emergency Manager gathers <strong>Emergency Management Team</strong> to assess situation.</li>
+                <li><strong>Site evacuation decision</strong> based on severity (chart above).</li>
+                <li>All personnel move to designated <strong>assembly points</strong> (refer to MP 09 – FORM 3: Evacuation Routes).</li>
+                <li>Head count reported to Emergency Manager.</li>
+            </ul>
+        </div>
+
+        <!-- 3. EXTERNAL SERVICES & ESCALATION -->
+        <div class="action-card">
+            <div class="badge-step">STEP 3 · EXTERNAL SUPPORT</div>
+            <h3>📞 Call External Emergency Services</h3>
+            <ul>
+                <li>If escalation is <strong>Level 1 or Level 2</strong> → Emergency Manager contacts external authorities: <span class="highlight">Civil Defense, Police, Ambulance, Hospitals</span>.</li>
+                <li>Use <strong>[MP 09 – FORM 2: Emergency Contact Sheet]</strong> available at all key locations.</li>
+                <li>For <strong>Level 2</strong> → also activate <strong>Corporate Crisis Management Team (CMT)</strong> for strategic support, media, and resources.</li>
+                <li>Coordinate with external responders: provide site layout, access routes, and incident commander details.</li>
+            </ul>
+            <div style="margin-top: 6px; font-size:0.8rem;">📋 Ensure liaison officer meets authorities at gate.</div>
+        </div>
+
+        <!-- 4. DEBRIEF & INCIDENT REPORTING -->
+        <div class="action-card">
+            <div class="badge-step">STEP 4 · POST-INCIDENT</div>
+            <h3>📋 Emergency Debrief & Reporting</h3>
+            <ul>
+                <li><strong>Debrief Meeting</strong> called by Emergency Manager within <strong>48 hours</strong> after emergency under control.</li>
+                <li>Location: O&M Contractor’s office. Involve external ER experts if needed.</li>
+                <li>Capture <strong>Lessons Learned</strong> and update emergency plan quarterly.</li>
+                <li><strong>Incident Report</strong> prepared using [MP 01 – Operation HSSE MS Manual] template.</li>
+                <li>If emergency was <strong>Level 2 or major crisis</strong> → formal <strong>Root Cause Analysis (RCA)</strong> by trained personnel.</li>
+                <li>Implement corrective actions and update Leg Chart if required.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- ADDITIONAL CRITICAL ACTIONS : ROLES & COMMUNICATION -->
+    <div class="action-plan-title" style="margin-top: 0.5rem;">
+        👥 Key Roles & Communication Protocol
+    </div>
+    <div class="actions-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px,1fr));">
+        <div class="action-card">
+            <h3>🛡️ Emergency Manager (O&M HSSE Manager)</h3>
+            <ul>
+                <li>Overall command of emergency response.</li>
+                <li>Determines escalation level (Minor / Level 1 / Level 2) based on chart.</li>
+                <li>Declares evacuation, contacts external agencies, activates CMT if needed.</li>
+                <li>Ensures headcount and coordinates debrief & incident report.</li>
+            </ul>
+        </div>
+        <div class="action-card">
+            <h3>📻 Emergency Group Communication</h3>
+            <ul>
+                <li>Walkie-talkie network connects all team members instantly.</li>
+                <li>Emergency Manager broadcasts: “Emergency Code, location, assembly point instruction”.</li>
+                <li>All radio traffic focuses on response coordination.</li>
+                <li>Secondary contact via mobile / satellite phone if needed.</li>
+            </ul>
+        </div>
+        <div class="action-card">
+            <h3>📌 Assembly Point Wardens</h3>
+            <ul>
+                <li>Each assembly point has assigned warden for roll call.</li>
+                <li>Report missing personnel to Emergency Manager immediately.</li>
+                <li>Provide first aid if required and keep evacuees calm.</li>
+                <li>Evacuation routes & maps displayed at strategic points.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- EMERGENCY CONTACT SHEET PLACEHOLDER (simulated) -->
+    <div class="emergency-contacts">
+        <div><strong>📞 EMERGENCY CONTACTS (REF MP11 - FORM 2)</strong></div>
+        <div class="contact-item">🚑 Ambulance / Civil Defense: 997 / 998</div>
+        <div class="contact-item">🔥 Fire Station (local): +971 XX XXX</div>
+        <div class="contact-item">👮 Police: 999</div>
+        <div class="contact-item">🏥 Nearest Hospital: Al Rahba Hospital +9712XXXX</div>
+        <div class="contact-item">⚡ O&M HSSE Manager: +971 XX XXX XXXX</div>
+        <div class="contact-item">🏢 Corporate Crisis Hotline: +971 XX XXX XXXX</div>
+    </div>
+
+    <!-- VISUAL SUMMARY MATRIX: Escalation levels & actions table (simple) -->
+    <div style="margin: 1.2rem 0 0.5rem;">
+        <div style="font-weight: 700; font-size:1rem; margin-bottom: 12px;">📌 Quick Reference: Escalation Level Actions</div>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+            <div style="display: flex; flex-wrap: wrap; background: #f9fbf7; border-radius: 20px; padding: 0.8rem; justify-content: space-between; align-items: center;">
+                <span style="font-weight:700; background:#2b7a3e20; padding: 0.2rem 1rem; border-radius: 50px;">🟢 MINOR</span>
+                <span>Site team responds, no external, internal report only.</span>
+                <span style="font-size:0.75rem;">⏱️ Debrief within 24-48h (simple log)</span>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; background: #fef8ef; border-radius: 20px; padding: 0.8rem; justify-content: space-between; align-items: center;">
+                <span style="font-weight:700; background:#e68a2e20; padding: 0.2rem 1rem; border-radius: 50px;">🟠 LEVEL 1</span>
+                <span>Local authorities invited, Emergency Manager coordinates, external resources on site. Corporate CMT standby only.</span>
+                <span style="font-size:0.75rem;">📋 Formal incident report + debrief</span>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; background: #fef0ed; border-radius: 20px; padding: 0.8rem; justify-content: space-between; align-items: center;">
+                <span style="font-weight:700; background:#c23b2220; padding: 0.2rem 1rem; border-radius: 50px;">🔴 LEVEL 2</span>
+                <span>Local authorities + Corporate Crisis Team activated, full escalation, RCA mandatory, media management.</span>
+                <span style="font-size:0.75rem;">📊 Executive debrief + RCA within 10 days</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action plan summary: 8.2 to 8.7 integrated -->
+    <div style="background: #eef5ea; border-radius: 24px; padding: 1rem 1.4rem; margin-top: 1.5rem;">
+        <div style="font-weight: 800; display: flex; gap: 6px; align-items: center;">✅ COMPLETE ACTION PLAN CHECKLIST (All Phases)</div>
+        <div style="display: flex; flex-wrap: wrap; gap: 1.2rem; margin-top: 0.8rem; justify-content: space-between;">
+            <div style="min-width: 150px;"><span style="font-weight:700;">IMMEDIATE:</span> Alert EM → Assess → Eliminate danger → Mark area → Protect personnel</div>
+            <div style="min-width: 150px;"><span style="font-weight:700;">COMMUNICATE:</span> Walkie-talkie group announcement → Assembly point order → External services if Level 1/2</div>
+            <div style="min-width: 150px;"><span style="font-weight:700;">EVACUATION:</span> Head count at assembly points → Emergency Manager decision → CMT activation if Level 2</div>
+            <div style="min-width: 150px;"><span style="font-weight:700;">RECOVERY:</span> Debrief within 48h → Incident report → RCA for major events → Quarterly leg chart update</div>
+        </div>
+    </div>
+
+    <div class="footer-note">
+        ⚡ Ajban Solar PV Plant – Independent Power Project · Emergency Action Plan aligns with O&M HSSE requirements.<br>
+        The simplified escalation chart defines severity (Minor, Level 1, Level 2). All actions follow witness-first-response, internal alert, external coordination, debrief & reporting. <br>
+        📄 References: MP 09 – FORM 2 (Emergency Contact Sheet) | MP 09 – FORM 3 (Assembly Points) | MP 01 – HSSE MS Manual · Quarterly leg chart review by O&M HSSE Manager.
+    </div>
+</div>
+</body>
+</html>
