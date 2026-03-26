@@ -12,10 +12,40 @@
         }
 
         body {
-            background: linear-gradient(135deg, #cfe9ff 0%, #e0f0ff 100%);
+            background: #cfe9ff;
             font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
             padding: 2rem 1.2rem;
             color: #0a2f44;
+        }
+
+        /* Print styles - ensure emergency contacts section prints properly */
+        @media print {
+            body {
+                background: white;
+                padding: 0.5rem;
+                margin: 0;
+            }
+            .plan-container {
+                box-shadow: none;
+                padding: 0.8rem;
+                border-radius: 0;
+            }
+            .emergency-hero {
+                break-inside: avoid;
+                page-break-inside: avoid;
+                background: #0b5e8a !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .flow-card, .action-card, .role-card {
+                break-inside: avoid;
+                page-break-inside: avoid;
+            }
+            .contact-badge {
+                background: rgba(255,255,255,0.25) !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
         }
 
         .plan-container {
@@ -62,18 +92,56 @@
             color: #1e6fa8;
         }
 
-        /* Emergency Hero Banner - Sky blue gradient - only ONE instance */
+        /* Emergency Hero Banner - FIXED: non-floating, stable, with sky blue below section */
+        .emergency-section-wrapper {
+            margin-bottom: 2rem;
+            position: relative;
+        }
         .emergency-hero {
             background: linear-gradient(135deg, #0b5e8a, #1e88e5);
-            border-radius: 32px;
+            border-radius: 32px 32px 0 0;
             padding: 1.2rem 1.8rem;
-            margin-bottom: 2rem;
             display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
             align-items: center;
             gap: 1rem;
-            box-shadow: 0 12px 24px -8px rgba(0, 100, 200, 0.3);
+            box-shadow: 0 8px 0 0 #5aa9dd;
+            position: relative;
+            z-index: 2;
+        }
+        /* Sky blue fixed section BELOW the emergency contacts - non-floating, solid background */
+        .sky-below-section {
+            background: #d4eaff;
+            border-radius: 0 0 28px 28px;
+            padding: 1rem 1.8rem;
+            margin-top: -8px;
+            position: relative;
+            z-index: 1;
+            border: 1px solid #bdd8f0;
+            border-top: none;
+            box-shadow: 0 4px 12px rgba(0, 80, 120, 0.08);
+        }
+        .sky-below-section p {
+            font-size: 0.85rem;
+            color: #0f5b87;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 0;
+        }
+        .sky-badge {
+            background: white;
+            padding: 0.2rem 0.8rem;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #1a6e9e;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
         }
         .emergency-hero h3 {
             color: #ffffff;
@@ -81,6 +149,7 @@
             letter-spacing: 1px;
             font-weight: 700;
             text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            margin: 0;
         }
         .contact-numbers {
             display: flex;
@@ -90,7 +159,7 @@
         }
         .contact-badge {
             background: rgba(255,255,255,0.2);
-            backdrop-filter: blur(8px);
+            backdrop-filter: blur(4px);
             padding: 0.5rem 1.2rem;
             border-radius: 60px;
             color: white;
@@ -260,14 +329,6 @@
             font-weight: 600;
             color: #c97e00;
         }
-        .pill-badge {
-            background: #d4eaff;
-            padding: 0.2rem 0.8rem;
-            border-radius: 30px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: #0f5b87;
-        }
 
         /* key roles section */
         .roles-section {
@@ -361,6 +422,22 @@
             font-weight: 600;
             color: #0f5b87;
         }
+        .quick-card {
+            background: #e9f3fa;
+            border-radius: 28px;
+            padding: 1rem 1.5rem;
+            margin-top: 1rem;
+        }
+        @media print {
+            .sky-below-section {
+                background: #d4eaff !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .contact-badge {
+                background: rgba(255,255,255,0.3) !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -371,18 +448,27 @@
             <h1>⚡ Ajban Solar PV Plant <span style="font-weight:400">Independent Power Project</span></h1>
             <p>Emergency Response Action Plan · Escalation Matrix & P.A.S.S. Protocol</p>
         </div>
-        <div class="version">🔄 Rev. Q2-2026 | Sky Blue Edition</div>
+        <div class="version">🔄 Rev. Q2-2026 | Print-Ready</div>
     </div>
 
-    <!-- EMERGENCY CONTACT BANNER (ONLY ONE PLACE - TOP, EXCELLENT VISIBILITY) -->
-    <div class="emergency-hero">
+    <!-- EMERGENCY CONTACT SECTION - FIXED NON-FLOATING with sky blue section BELOW -->
+    <div class="emergency-section-wrapper">
+        <div class="emergency-hero">
         <h3>📞 24/7 AUTHORIZED EMERGENCY CONTACTS</h3>
-        <div class="contact-numbers">
-            <div class="contact-badge">🚑 Site Ambulance: <strong>0526 550 063</strong></div>
-            <div class="contact-badge">🛡️ Site Security: <strong>0509 637 247</strong></div>
-            <div class="contact-badge">👮 Police: <strong>999</strong></div>
-            <div class="contact-badge">🔥 Fire Emergency: <strong>997</strong></div>
-            <div class="contact-badge">☠️ Poison Help: <strong>800424</strong></div>
+        <h3>🚑 Site Ambulance: <strong>0526 550 063</strong></h3>
+        <h3>🛡️ Site Security: <strong>0509 637 247</strong></strong></h3>
+           <h3>👮 Police: <strong>999</strong></h3>
+               <h3>🔥 Fire Emergency: <strong>997</strong></h3>  
+                <h3>☠️ Poison Help: <strong>800424</strong></h3>  
+        </div>
+        <!-- FIXED SKY BLUE SECTION BELOW (no floating, stable background) -->
+        <div class="sky-below-section">
+            <p>
+                <span class="sky-badge">📢 24/7 Emergency Response Coordination</span>
+                <span class="sky-badge">⚡ All calls recorded & dispatched immediately</span>
+                <span class="sky-badge">📍 Display at all access points & control room</span>
+                <span style="margin-left:auto;">🚨 In case of emergency: stay calm, provide location, follow P.A.S.S.</span>
+            </p>
         </div>
     </div>
 
@@ -417,7 +503,7 @@
             </div>
         </div>
         
-        <!-- P.A.S.S. Extinguisher Operation integrated in elegant way -->
+        <!-- P.A.S.S. Extinguisher Operation integrated -->
         <div class="extinguisher-note">
             🧯 <strong>EXTINGUISHER OPERATION (P.A.S.S. Method)</strong> &nbsp;|&nbsp;
             <span><strong>P</strong>ULL the pin</span> &nbsp;→&nbsp;
@@ -513,7 +599,7 @@
                 <li>Walkie-talkie network connects all team members instantly.</li>
                 <li>Emergency Manager broadcasts: “Emergency Code, location, assembly point”.</li>
                 <li>Secondary contact via mobile phones & site directory.</li>
-                <li>All external calls use authorized numbers (displayed at top).</li>
+                <li>All external calls use authorized numbers (displayed in contact banner).</li>
             </ul>
         </div>
         <div class="role-card">
@@ -547,8 +633,8 @@
         </div>
     </div>
 
-    <!-- Unified action checklist simplified (no duplicate numbers, no duplicate checklist heavy) -->
-    <div style="background: #e9f3fa; border-radius: 28px; padding: 1rem 1.5rem; margin-top: 1rem;">
+    <!-- Unified action checklist (simplified, no duplicate numbers) -->
+    <div class="quick-card">
         <div style="font-weight: 800; display: flex; gap: 8px; align-items: center; color: #1a6e9e;">📋 EMERGENCY RESPONSE QUICK CARD</div>
         <div style="display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 0.8rem; justify-content: space-between;">
             <div style="min-width: 140px;"><span style="font-weight:700;">🚨 IMMEDIATE:</span> P.A.S.S. if fire → Alert Security & Emergency Manager</div>
@@ -560,7 +646,7 @@
 
     <div class="footer-note">
         ⚡ Ajban Solar PV Plant – Independent Power Project · Emergency Action Plan integrates authorized external numbers: Site Ambulance 0526 550 063, Security 0509 637 247, Police 999, Fire 997, Poison Help 800424. <br>
-        Escalation chart defines Minor, Level 1, Level 2 with clear P.A.S.S. extinguisher operation. Quarterly leg chart review by O&M HSSE Manager. Sky Blue safety commitment.
+        Escalation chart defines Minor, Level 1, Level 2 with clear P.A.S.S. extinguisher operation. Fixed emergency banner with sky blue section below — print-ready format. Quarterly review by O&M HSSE Manager.
     </div>
 </div>
 </body>
