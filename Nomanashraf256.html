@@ -1,0 +1,2130 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CAHK Solar · Security Checklist System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js">
+    </script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js">
+    </script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js">
+    </script>
+    <style>
+        /* ===== All existing styles remain the same ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+        }
+
+        body {
+            background: #e8edf4;
+            padding: 20px 16px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .app-wrapper {
+            max-width: 1400px;
+            width: 100%;
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 20px 60px rgba(0, 20, 40, 0.10);
+            padding: 20px 24px 30px;
+        }
+
+        .fixed-header {
+            background: linear-gradient(135deg, #0b2a44 0%, #1a4b6e 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 16px 24px;
+            margin-bottom: 18px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 6px 20px rgba(11, 42, 68, 0.25);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .fixed-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, rgba(245, 179, 66, 0.08) 0%, transparent 70%);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .fixed-header .project-title {
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1 1 300px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .fixed-header .project-title i {
+            color: #f5b342;
+            font-size: 28px;
+            flex-shrink: 0;
+        }
+
+        .fixed-header .project-title div {
+            line-height: 1.3;
+        }
+
+        .fixed-header .project-title small {
+            font-weight: 400;
+            font-size: 12px;
+            opacity: 0.8;
+            display: block;
+            margin-top: 2px;
+        }
+
+        .fixed-header .header-meta {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px 18px;
+            background: rgba(255, 255, 255, 0.10);
+            padding: 6px 16px 6px 20px;
+            border-radius: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            position: relative;
+            z-index: 1;
+        }
+
+        .fixed-header .header-meta {
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        @supports (backdrop-filter: blur(8px)) or (-webkit-backdrop-filter: blur(8px)) {
+            .fixed-header .header-meta {
+                -webkit-backdrop-filter: blur(8px);
+                backdrop-filter: blur(8px);
+                background: rgba(255, 255, 255, 0.08);
+            }
+        }
+
+        .fixed-header .header-meta .meta-group {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px 16px;
+        }
+
+        .fixed-header .header-meta label {
+            font-weight: 500;
+            font-size: 12px;
+            opacity: 0.85;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+
+        .fixed-header .header-meta label i {
+            font-size: 14px;
+            opacity: 0.7;
+        }
+
+        .fixed-header .header-meta input[type="date"],
+        .fixed-header .header-meta input[type="time"] {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.20);
+            border-radius: 30px;
+            padding: 4px 12px;
+            color: white;
+            font-weight: 500;
+            font-size: 13px;
+            outline: none;
+            min-width: 120px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .fixed-header .header-meta input[type="date"]:hover,
+        .fixed-header .header-meta input[type="time"]:hover {
+            background: rgba(255, 255, 255, 0.18);
+        }
+
+        .fixed-header .header-meta input[type="date"]:focus,
+        .fixed-header .header-meta input[type="time"]:focus {
+            border-color: #f5b342;
+            box-shadow: 0 0 0 3px rgba(245, 179, 66, 0.20);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .fixed-header .header-meta input[type="date"]::-webkit-calendar-picker-indicator,
+        .fixed-header .header-meta input[type="time"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+
+        .fixed-header .header-meta input[type="date"]::-webkit-calendar-picker-indicator:hover,
+        .fixed-header .header-meta input[type="time"]::-webkit-calendar-picker-indicator:hover {
+            opacity: 1;
+        }
+
+        .fixed-header .header-meta .auto-save-status {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            opacity: 0.6;
+            padding-left: 6px;
+            border-left: 1px solid rgba(255, 255, 255, 0.15);
+            white-space: nowrap;
+        }
+
+        .lang-toggle {
+            display: flex;
+            gap: 4px;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 3px;
+            border-radius: 40px;
+            margin-left: 6px;
+        }
+
+        .lang-toggle button {
+            background: transparent;
+            border: none;
+            padding: 4px 14px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.7);
+            transition: 0.15s;
+        }
+
+        .lang-toggle button.active {
+            color: white;
+            background: rgba(255, 255, 255, 0.18);
+        }
+
+        @media (max-width: 850px) {
+            .fixed-header {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 16px 18px;
+            }
+
+            .fixed-header .project-title {
+                font-size: 16px;
+                flex: 1 1 auto;
+            }
+
+            .fixed-header .project-title i {
+                font-size: 24px;
+            }
+
+            .fixed-header .header-meta {
+                justify-content: center;
+                padding: 8px 14px;
+                flex-wrap: wrap;
+            }
+
+            .fixed-header .header-meta .meta-group {
+                justify-content: center;
+                flex: 1 1 100%;
+            }
+
+            .fixed-header .header-meta .auto-save-status {
+                border-left: none;
+                padding-left: 0;
+                padding-top: 4px;
+                border-top: 1px solid rgba(255, 255, 255, 0.10);
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 500px) {
+            .fixed-header {
+                padding: 12px 14px;
+                border-radius: 16px;
+            }
+
+            .fixed-header .project-title {
+                font-size: 14px;
+                gap: 8px;
+            }
+
+            .fixed-header .project-title i {
+                font-size: 20px;
+            }
+
+            .fixed-header .project-title small {
+                font-size: 10px;
+            }
+
+            .fixed-header .header-meta {
+                padding: 6px 10px;
+                border-radius: 30px;
+                gap: 6px;
+            }
+
+            .fixed-header .header-meta .meta-group {
+                gap: 6px 10px;
+            }
+
+            .fixed-header .header-meta label {
+                font-size: 10px;
+            }
+
+            .fixed-header .header-meta label i {
+                font-size: 12px;
+            }
+
+            .fixed-header .header-meta input[type="date"],
+            .fixed-header .header-meta input[type="time"] {
+                font-size: 11px;
+                min-width: 90px;
+                padding: 3px 8px;
+            }
+
+            .fixed-header .header-meta .auto-save-status {
+                font-size: 10px;
+            }
+        }
+
+        .tab-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin: 16px 0 14px;
+            border-bottom: 2px solid #dce6f0;
+            padding-bottom: 2px;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            padding: 10px 24px;
+            font-weight: 600;
+            font-size: 15px;
+            color: #3a5e7e;
+            border-radius: 30px 30px 0 0;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab-btn i {
+            font-size: 16px;
+        }
+
+        .tab-btn.active {
+            background: #e4f0fa;
+            color: #0f3f62;
+            border-bottom: 4px solid #1a6b9e;
+        }
+
+        .tab-btn:hover {
+            background: #eaf2fa;
+        }
+
+        .tab-content {
+            display: none;
+            margin-top: 12px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .checklist-card {
+            background: #fafdff;
+            border: 1px solid #dee9f3;
+            border-radius: 24px;
+            padding: 20px 24px 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+        }
+
+        .checklist-card h2 {
+            font-size: 22px;
+            color: #103a5a;
+            margin-bottom: 2px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .checklist-card .subhead {
+            color: #4b6f8f;
+            font-size: 14px;
+            margin-bottom: 16px;
+            border-bottom: 1px dashed #d2e0ed;
+            padding-bottom: 10px;
+        }
+
+        .badge-role {
+            background: #d3e3f5;
+            padding: 2px 16px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #1a4a6e;
+        }
+
+        .badge-status {
+            padding: 2px 14px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .badge-pending {
+            background: #fef3d7;
+            color: #a67c1a;
+        }
+
+        .badge-submitted {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .badge-approved {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-rejected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .check-item {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 8px 16px;
+            padding: 6px 0;
+            border-bottom: 1px solid #edf3f9;
+        }
+
+        .check-item .q {
+            flex: 2 1 220px;
+            font-weight: 500;
+            color: #1f3750;
+            font-size: 14px;
+        }
+
+        .check-item .status-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .status-group label {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 13px;
+            color: #1f4060;
+            cursor: pointer;
+        }
+
+        .status-group input[type="radio"] {
+            accent-color: #1f6b9e;
+            width: 15px;
+            height: 15px;
+            cursor: pointer;
+        }
+
+        .remark-input {
+            border: 1px solid #ccdcec;
+            border-radius: 30px;
+            padding: 4px 16px;
+            font-size: 13px;
+            background: white;
+            min-width: 140px;
+            flex: 1 1 160px;
+        }
+
+        .remark-input:focus {
+            border-color: #2a7bb5;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(42, 123, 181, 0.08);
+        }
+
+        .photo-upload {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 4px 0;
+        }
+
+        .photo-upload label {
+            background: #e8f0f9;
+            padding: 3px 16px;
+            border-radius: 40px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #1b4c72;
+            cursor: pointer;
+            border: 1px solid #c2d6ec;
+            transition: 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .photo-upload label:hover {
+            background: #d4e3f5;
+        }
+
+        .photo-upload input[type="file"] {
+            display: none;
+        }
+
+        .photo-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .photo-preview img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 1px solid #bcd0e5;
+            background: #f7fbff;
+        }
+
+        .signature-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px 30px;
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid #dee9f3;
+        }
+
+        .signature-row label {
+            font-weight: 600;
+            color: #164060;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+        }
+
+        .signature-row input {
+            border: none;
+            border-bottom: 2px solid #b9cfe3;
+            background: transparent;
+            padding: 4px 6px;
+            font-weight: 500;
+            min-width: 140px;
+        }
+
+        .signature-row input:focus {
+            border-bottom-color: #1f6b9e;
+            outline: none;
+        }
+
+        .signature-row .readonly-text {
+            font-weight: 500;
+            color: #1f4a70;
+            padding: 4px 8px;
+            background: #f2f7fc;
+            border-radius: 8px;
+        }
+
+        .review-section {
+            background: #f8faff;
+            border-radius: 16px;
+            padding: 16px 20px;
+            margin: 12px 0;
+            border-left: 5px solid #1a6b9e;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 16px 30px;
+        }
+
+        .review-section label {
+            font-weight: 600;
+            color: #164060;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .review-section input,
+        .review-section textarea {
+            border: 1px solid #ccdcec;
+            border-radius: 30px;
+            padding: 6px 16px;
+            font-size: 13px;
+            background: white;
+            min-width: 180px;
+            flex: 1;
+        }
+
+        .review-section textarea {
+            border-radius: 16px;
+            min-height: 50px;
+            resize: vertical;
+        }
+
+        .tab-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 14px;
+            margin-top: 18px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .btn-pdf {
+            background: #1a4b6e;
+            color: white;
+            border: none;
+            padding: 8px 28px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 10px rgba(0, 40, 70, 0.12);
+            transition: 0.15s;
+        }
+
+        .btn-pdf:hover {
+            background: #0e3652;
+            transform: scale(1.01);
+        }
+
+        .btn-pdf:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-reset {
+            background: transparent;
+            border: 1px solid #b6cee6;
+            padding: 8px 24px;
+            border-radius: 40px;
+            font-weight: 600;
+            color: #1e4970;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+
+        .btn-reset:hover {
+            background: #e4eff9;
+        }
+
+        .btn-submit {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 8px 28px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.15s;
+        }
+
+        .btn-submit:hover {
+            background: #1e7e34;
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-approve {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 6px 20px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+
+        .btn-approve:hover {
+            background: #1e7e34;
+        }
+
+        .btn-reject {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 6px 20px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+
+        .btn-reject:hover {
+            background: #bd2130;
+        }
+
+        .btn-sm {
+            padding: 4px 16px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+
+        .btn-sm-pdf {
+            background: #1a4b6e;
+            color: white;
+        }
+
+        .btn-sm-pdf:hover {
+            background: #0e3652;
+        }
+
+        .btn-sm-view {
+            background: #e8f0f9;
+            color: #1a4b6e;
+            border: 1px solid #b6cee6;
+        }
+
+        .btn-sm-view:hover {
+            background: #d4e3f5;
+        }
+
+        .btn-sm-edit {
+            background: #ffc107;
+            color: #212529;
+            border: 1px solid #e0a800;
+        }
+
+        .btn-sm-edit:hover {
+            background: #e0a800;
+        }
+
+        .preview-card {
+            background: #f8faff;
+            border: 1px solid #dce6f0;
+            border-radius: 16px;
+            padding: 16px 20px;
+            margin-bottom: 14px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .preview-card .info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 20px;
+            align-items: center;
+        }
+
+        .preview-card .info strong {
+            color: #103a5a;
+        }
+
+        .preview-card .actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .empty-state {
+            color: #6f8aa5;
+            text-align: center;
+            padding: 30px 10px;
+            font-size: 15px;
+        }
+
+        .rtl {
+            direction: rtl;
+            text-align: right;
+        }
+
+        .rtl .status-group {
+            direction: rtl;
+        }
+
+        .rtl .remark-input {
+            direction: rtl;
+        }
+
+        .rtl .check-item .q {
+            text-align: right;
+        }
+
+        @media (max-width: 700px) {
+            .app-wrapper {
+                padding: 12px;
+            }
+
+            .fixed-header {
+                padding: 14px 18px;
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .fixed-header .header-meta {
+                justify-content: center;
+                padding: 8px 14px;
+            }
+
+            .tab-btn {
+                padding: 8px 14px;
+                font-size: 13px;
+            }
+
+            .check-item {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .preview-card {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .review-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.65);
+            z-index: 999;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal-box {
+            background: white;
+            border-radius: 28px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 28px 32px 32px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+            position: relative;
+        }
+
+        .modal-box .close-modal {
+            position: sticky;
+            top: 0;
+            float: right;
+            background: #f0f4fa;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            font-size: 20px;
+            cursor: pointer;
+            color: #1f3b57;
+            transition: 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .modal-box .close-modal:hover {
+            background: #dce6f0;
+        }
+
+        .modal-box .modal-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #0b2a44;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .modal-box .modal-body {
+            margin-top: 10px;
+        }
+
+        .modal-box .modal-body .check-item {
+            padding: 4px 0;
+        }
+
+        .modal-box .modal-body .photo-preview img {
+            width: 60px;
+            height: 60px;
+        }
+
+        /* Firebase sync status */
+        .sync-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            padding: 2px 12px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .sync-status .sync-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .sync-status .sync-dot.online {
+            background: #4ade80;
+        }
+
+        .sync-status .sync-dot.offline {
+            background: #f87171;
+        }
+
+        .sync-status .sync-dot.syncing {
+            background: #fbbf24;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-wrapper" id="appWrapper">
+
+        <!-- ===== FIXED HEADER ===== -->
+        <div class="fixed-header">
+            <div class="project-title">
+                <i class="fas fa-solar-panel"></i>
+                <div>
+                    1100 MW AL HENAKIYAH SOLAR PHOTOVOLTAIC INDEPENDENT POWER PLANT
+                    <small>Security Inspection & Reporting System</small>
+                </div>
+            </div>
+            <div class="header-meta">
+                <div class="meta-group">
+                    <label>
+                        <i class="far fa-calendar-alt"></i>
+                        <input type="date" id="reportDate" />
+                    </label>
+                    <label>
+                        <i class="far fa-clock"></i>
+                        <input type="time" id="reportTime" />
+                    </label>
+                </div>
+                <div class="auto-save-status">
+                    <i class="fas fa-circle" style="color: #4ade80; font-size: 8px; margin-right: 6px;"></i>
+                    <span>Auto-saved</span>
+                </div>
+                <div class="sync-status" id="syncStatus">
+                    <span class="sync-dot online" id="syncDot"></span>
+                    <span id="syncText">Synced</span>
+                </div>
+                <div class="lang-toggle" id="langToggle">
+                    <button class="active" data-lang="en">EN</button>
+                    <button data-lang="ar">عربي</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== TABS ===== -->
+        <div class="tab-bar">
+            <button class="tab-btn active" data-tab="tabPatrol"><i class="fas fa-car"></i> Patrol</button>
+            <button class="tab-btn" data-tab="tabGate"><i class="fas fa-door-open"></i> Main Gate</button>
+            <button class="tab-btn" data-tab="tabCCTV"><i class="fas fa-video"></i> CCTV</button>
+            <button class="tab-btn" data-tab="tabSupervisor"><i class="fas fa-clipboard-check"></i> Supervisor</button>
+            <button class="tab-btn" data-tab="tabGeneral"><i class="fas fa-folder-open"></i> General</button>
+        </div>
+
+        <!-- ========== PATROL TAB ========== -->
+        <div id="tabPatrol" class="tab-content active">
+            <div class="checklist-card" id="patrolCard">
+                <h2><i class="fas fa-car"></i> Patrol Vehicle & Team <span class="badge-role">Driver + Guard</span>
+                    <span id="patrolStatusBadge" class="badge-status badge-pending">Pending</span>
+                </h2>
+                <div class="subhead">Minimum 2 persons · Two patrols per shift · Speed monitoring · Fence inspection
+                </div>
+                <div id="patrolItems"></div>
+                <div class="signature-row">
+                    <label><i class="fas fa-user"></i> Patrol Driver <input type="text" id="patrolDriver"
+                            placeholder="Driver Name"></label>
+                    <label><i class="fas fa-user-friends"></i> Patrol Guard <input type="text" id="patrolGuard"
+                            placeholder="Guard Name"></label>
+                    <label><i class="fas fa-clock"></i> Shift <input type="text" id="patrolShift"
+                            placeholder="Day/Night" value="Day"></label>
+                </div>
+                <div class="review-section" id="patrolReview">
+                    <label><i class="fas fa-user-tie"></i> Supervisor Review</label>
+                    <input type="text" id="patrolReviewer" placeholder="Supervisor Name" readonly
+                        style="background:#f2f7fc;">
+                    <textarea id="patrolReviewComment" placeholder="Review comments..." readonly
+                        style="background:#f2f7fc;"></textarea>
+                    <span id="patrolReviewStatus" style="font-weight:600;color:#6f8aa5;">Awaiting submission</span>
+                </div>
+                <div class="tab-footer">
+                    <button class="btn-reset" data-reset="patrol"><i class="fas fa-undo-alt"></i> Reset</button>
+                    <button class="btn-submit" data-submit="patrol"><i class="fas fa-paper-plane"></i> Submit for
+                        Review</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== GATE TAB ========== -->
+        <div id="tabGate" class="tab-content">
+            <div class="checklist-card" id="gateCard">
+                <h2><i class="fas fa-door-open"></i> Main Gate & Access <span class="badge-role">Gate Guard</span>
+                    <span id="gateStatusBadge" class="badge-status badge-pending">Pending</span>
+                </h2>
+                <div class="subhead">Visitor management · Vehicle inspection · Road blocker · Door security</div>
+                <div id="gateItems"></div>
+                <div class="signature-row">
+                    <label><i class="fas fa-user"></i> Gate Guard <input type="text" id="gateGuard"
+                            placeholder="Guard Name"></label>
+                    <label><i class="fas fa-clock"></i> Shift <input type="text" id="gateShift" placeholder="Day/Night"
+                            value="Day"></label>
+                </div>
+                <div class="review-section" id="gateReview">
+                    <label><i class="fas fa-user-tie"></i> Supervisor Review</label>
+                    <input type="text" id="gateReviewer" placeholder="Supervisor Name" readonly
+                        style="background:#f2f7fc;">
+                    <textarea id="gateReviewComment" placeholder="Review comments..." readonly
+                        style="background:#f2f7fc;"></textarea>
+                    <span id="gateReviewStatus" style="font-weight:600;color:#6f8aa5;">Awaiting submission</span>
+                </div>
+                <div class="tab-footer">
+                    <button class="btn-reset" data-reset="gate"><i class="fas fa-undo-alt"></i> Reset</button>
+                    <button class="btn-submit" data-submit="gate"><i class="fas fa-paper-plane"></i> Submit for
+                        Review</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== CCTV TAB ========== -->
+        <div id="tabCCTV" class="tab-content">
+            <div class="checklist-card" id="cctvCard">
+                <h2><i class="fas fa-video"></i> CCTV & Technical <span class="badge-role">CCTV Guard</span>
+                    <span id="cctvStatusBadge" class="badge-status badge-pending">Pending</span>
+                </h2>
+                <div class="subhead">Cameras · Recording · Server/UPS/EDG · Access control · Door security</div>
+                <div id="cctvItems"></div>
+                <div class="signature-row">
+                    <label><i class="fas fa-user"></i> CCTV Guard <input type="text" id="cctvGuard"
+                            placeholder="Guard Name"></label>
+                    <label><i class="fas fa-clock"></i> Shift <input type="text" id="cctvShift" placeholder="Day/Night"
+                            value="Day"></label>
+                </div>
+                <div class="review-section" id="cctvReview">
+                    <label><i class="fas fa-user-tie"></i> Supervisor Review</label>
+                    <input type="text" id="cctvReviewer" placeholder="Supervisor Name" readonly
+                        style="background:#f2f7fc;">
+                    <textarea id="cctvReviewComment" placeholder="Review comments..." readonly
+                        style="background:#f2f7fc;"></textarea>
+                    <span id="cctvReviewStatus" style="font-weight:600;color:#6f8aa5;">Awaiting submission</span>
+                </div>
+                <div class="tab-footer">
+                    <button class="btn-reset" data-reset="cctv"><i class="fas fa-undo-alt"></i> Reset</button>
+                    <button class="btn-submit" data-submit="cctv"><i class="fas fa-paper-plane"></i> Submit for
+                        Review</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== SUPERVISOR TAB ========== -->
+        <div id="tabSupervisor" class="tab-content">
+            <div class="checklist-card">
+                <h2><i class="fas fa-clipboard-check"></i> Supervisor Review Panel <span class="badge-role">Shift
+                        Supervisor</span></h2>
+                <div class="subhead">Review submitted checklists · Approve or Reject</div>
+                <div id="supervisorQueue"></div>
+                <div class="signature-row">
+                    <label><i class="fas fa-user-tie"></i> Supervisor Name <input type="text" id="supName"
+                            placeholder="Supervisor Name" value="Ahmed Al-Fahd"></label>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== GENERAL TAB ========== -->
+        <div id="tabGeneral" class="tab-content">
+            <div class="checklist-card">
+                <h2><i class="fas fa-folder-open"></i> All Finalized Checklists <span class="badge-role">Preview &
+                        Download</span></h2>
+                <div class="subhead">Approved or Rejected checklists are available here for full preview and PDF
+                    download.</div>
+                <div id="generalList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODAL FOR PREVIEW (read-only) ===== -->
+    <div class="modal-overlay" id="previewModal">
+        <div class="modal-box">
+            <button class="close-modal" id="closeModal"><i class="fas fa-times"></i></button>
+            <div class="modal-title" id="modalTitle"><i class="fas fa-file-alt"></i> Checklist Preview</div>
+            <div class="modal-body" id="modalBody"></div>
+            <div style="margin-top:20px;display:flex;gap:12px;flex-wrap:wrap;justify-content:flex-end;">
+                <button class="btn-reset" id="modalCloseBtn">Close</button>
+                <button class="btn-pdf" id="modalPdfBtn"><i class="fas fa-file-pdf"></i> Download PDF</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ============================================================
+        // FIREBASE CONFIGURATION - Replace with your own config
+        // ============================================================
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC2xegdjP2dp6hSElbh1jtH-AyLMDjUKl8",
+            authDomain: "ahk-management.firebaseapp.com",
+            projectId: "ahk-management",
+            storageBucket: "ahk-management.firebasestorage.app",
+            messagingSenderId: "829202236172",
+            appId: "1:829202236172:web:f16e1f713ca771dd2a7f29"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        // Initialize Firebase
+        let firebaseInitialized = false;
+        let db = null;
+        let syncEnabled = false;
+        let syncInterval = null;
+        let isSyncing = false;
+        let lastSyncData = null;
+
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.database();
+            firebaseInitialized = true;
+            syncEnabled = true;
+            console.log('Firebase initialized successfully');
+        } catch (e) {
+            console.warn('Firebase initialization failed:', e.message);
+            syncEnabled = false;
+        }
+
+        // ============================================================
+        // STATE MANAGEMENT
+        // ============================================================
+        const STORAGE_KEY = 'cahk_security_checklists_v3';
+
+        function getDefaultChecklist() {
+            return {
+                status: 'pending',
+                reviewer: '',
+                comment: '',
+                items: {},
+                guardFields: {}
+            };
+        }
+
+        function getDefaultState() {
+            return {
+                patrol: getDefaultChecklist(),
+                gate: getDefaultChecklist(),
+                cctv: getDefaultChecklist(),
+                reviewQueue: [],
+                header: { date: '', time: '' }
+            };
+        }
+
+        function loadState() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    ['patrol', 'gate', 'cctv'].forEach(key => {
+                        if (!parsed[key]) parsed[key] = getDefaultChecklist();
+                        if (!parsed[key].items) parsed[key].items = {};
+                        if (!parsed[key].guardFields) parsed[key].guardFields = {};
+                    });
+                    if (!parsed.reviewQueue) parsed.reviewQueue = [];
+                    if (!parsed.header) parsed.header = { date: '', time: '' };
+                    return parsed;
+                }
+            } catch (e) { console.warn('State load error', e); }
+            return getDefaultState();
+        }
+
+        let state = loadState();
+        let lang = 'en';
+        let modalTargetKey = null;
+
+        function saveState() {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+                // Sync to Firebase if enabled
+                if (syncEnabled && firebaseInitialized) {
+                    syncToFirebase();
+                }
+            } catch (e) { console.warn('Save error', e); }
+        }
+
+        // ============================================================
+        // FIREBASE SYNC FUNCTIONS
+        // ============================================================
+        function updateSyncStatus(status, message) {
+            const dot = document.getElementById('syncDot');
+            const text = document.getElementById('syncText');
+            if (!dot || !text) return;
+
+            dot.className = 'sync-dot';
+            if (status === 'online') {
+                dot.classList.add('online');
+                text.textContent = message || 'Synced';
+            } else if (status === 'offline') {
+                dot.classList.add('offline');
+                text.textContent = message || 'Offline';
+            } else if (status === 'syncing') {
+                dot.classList.add('syncing');
+                text.textContent = message || 'Syncing...';
+            }
+        }
+
+        function syncToFirebase() {
+            if (!syncEnabled || !firebaseInitialized || isSyncing) return;
+            isSyncing = true;
+            updateSyncStatus('syncing', 'Syncing...');
+
+            const syncData = {
+                patrol: state.patrol,
+                gate: state.gate,
+                cctv: state.cctv,
+                reviewQueue: state.reviewQueue,
+                header: state.header,
+                updatedAt: firebase.database.ServerValue.TIMESTAMP
+            };
+
+            db.ref('checklists').set(syncData)
+                .then(() => {
+                    isSyncing = false;
+                    lastSyncData = syncData;
+                    updateSyncStatus('online', 'Synced');
+                })
+                .catch((error) => {
+                    isSyncing = false;
+                    console.error('Firebase sync error:', error);
+                    updateSyncStatus('offline', 'Sync failed');
+                });
+        }
+
+        function loadFromFirebase() {
+            if (!syncEnabled || !firebaseInitialized) return;
+
+            updateSyncStatus('syncing', 'Loading...');
+
+            db.ref('checklists').once('value')
+                .then((snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        // Merge remote data with local
+                        ['patrol', 'gate', 'cctv'].forEach(key => {
+                            if (data[key]) {
+                                state[key] = data[key];
+                            }
+                        });
+                        if (data.reviewQueue) state.reviewQueue = data.reviewQueue;
+                        if (data.header) state.header = data.header;
+                        saveState();
+                        refreshAllUI();
+                        updateSyncStatus('online', 'Synced');
+                    } else {
+                        // No data in Firebase, push local data
+                        syncToFirebase();
+                    }
+                })
+                .catch((error) => {
+                    console.error('Firebase load error:', error);
+                    updateSyncStatus('offline', 'Load failed');
+                });
+        }
+
+        // Listen for real-time updates from Firebase
+        function listenFirebaseUpdates() {
+            if (!syncEnabled || !firebaseInitialized) return;
+
+            db.ref('checklists').on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data && !isSyncing) {
+                    // Check if data is different from current state
+                    const currentStr = JSON.stringify({
+                        patrol: state.patrol,
+                        gate: state.gate,
+                        cctv: state.cctv,
+                        reviewQueue: state.reviewQueue,
+                        header: state.header
+                    });
+                    const newStr = JSON.stringify({
+                        patrol: data.patrol,
+                        gate: data.gate,
+                        cctv: data.cctv,
+                        reviewQueue: data.reviewQueue,
+                        header: data.header
+                    });
+
+                    if (currentStr !== newStr) {
+                        // Remote data changed, update local state
+                        ['patrol', 'gate', 'cctv'].forEach(key => {
+                            if (data[key]) {
+                                state[key] = data[key];
+                            }
+                        });
+                        if (data.reviewQueue) state.reviewQueue = data.reviewQueue;
+                        if (data.header) state.header = data.header;
+                        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+                        refreshAllUI();
+                        updateSyncStatus('online', 'Synced');
+                    }
+                }
+            });
+        }
+
+        function refreshAllUI() {
+            ['patrol', 'gate', 'cctv'].forEach(key => {
+                buildChecklist(key, key + 'Items');
+                restoreToDOM(key);
+            });
+            updateGeneralTab();
+            updateSupervisorQueue();
+            updateHeaderFields();
+        }
+
+        // ============================================================
+        // DATA
+        // ============================================================
+        const itemsData = {
+            patrol: [
+                { id: 'p1', textEn: 'Vehicle exterior satisfactory', textAr: 'مظهر المركبة الخارجي مرضٍ' },
+                { id: 'p2', textEn: 'Fuel level adequate', textAr: 'مستوى الوقود كافٍ' },
+                { id: 'p3', textEn: 'Engine oil / coolant / brake fluid OK', textAr: 'زيت المحرك / المبرد / سائل الفرامل جيد' },
+                { id: 'p4', textEn: 'Tyre pressure & condition (incl. spare)', textAr: 'ضغط الإطارات وحالتها (بما في ذلك الاحتياطي)' },
+                { id: 'p5', textEn: 'Lights, horn, reverse alarm operational', textAr: 'الأضواء، المنبه، إنذار الرجوع للخلف يعمل' },
+                { id: 'p6', textEn: 'Safety equipment (First Aid, Fire Ext., Triangle)', textAr: 'معدات السلامة (إسعافات أولية، طفاية، مثلث)' },
+                { id: 'p7', textEn: 'Radio / GPS / communication operational', textAr: 'الراديو / GPS / الاتصالات تعمل' },
+                { id: 'p8', textEn: 'Two patrols completed (min 2 persons)', textAr: 'تم إجراء دوريتين (شخصان على الأقل)' },
+                { id: 'p9', textEn: 'Perimeter fence & gate integrity checked', textAr: 'تم فحص سلامة السياج المحيط والبوابة' },
+                { id: 'p10', textEn: 'Speed monitoring: vehicles within 20 kph', textAr: 'مراقبة السرعة: المركبات ضمن 20 كم/س' },
+                { id: 'p11', textEn: 'Emergency exits clear, no fire hazards', textAr: 'مخارج الطوارئ خالية، لا مخاطر حريق' },
+                { id: 'p12', textEn: 'No unauthorized persons / suspicious activity', textAr: 'لا أشخاص غير مصرح لهم / نشاط مشبوه' }
+            ],
+            gate: [
+                { id: 'g1', textEn: 'Main gate & pedestrian gate operational', textAr: 'البوابة الرئيسية وبوابة المشاة تعملان' },
+                { id: 'g2', textEn: 'Road blocker & arm barrier functional', textAr: 'مانع الطريق والحاجز الذراعي يعملان' },
+                { id: 'g3', textEn: 'Traffic signals / emergency stop OK', textAr: 'إشارات المرور / إيقاف الطوارئ جيد' },
+                { id: 'g4', textEn: 'Visitor registration & gate pass issued', textAr: 'تسجيل الزوار وإصدار تصريح الدخول' },
+                { id: 'g5', textEn: 'Vehicle inspection (interior, trunk, mirror)', textAr: 'تفتيش المركبة (الداخل، الصندوق، المرآة)' },
+                { id: 'g6', textEn: 'Visitor IDs / Driver licenses verified', textAr: 'التحقق من هويات الزوار / رخص القيادة' },
+                { id: 'g7', textEn: 'Metal detector (walk-through) operational', textAr: 'كاشف المعادن (العبور) يعمل' },
+                { id: 'g8', textEn: 'Parking areas orderly, signs visible', textAr: 'مناطق الانتظار منظمة، اللوحات واضحة' },
+                { id: 'g9', textEn: 'Guard house clean, AC (one running)', textAr: 'بيت الحراسة نظيف، مكيف واحد يعمل' },
+                { id: 'g10', textEn: 'Fire extinguisher, emergency contact list', textAr: 'طفاية حريق، قائمة جهات الطوارئ' },
+                { id: 'g11', textEn: 'Toilet clean, no leakage, septic cover secured', textAr: 'دورة المياه نظيفة، لا تسرب، غطاء البيارة مؤمن' },
+                { id: 'g12', textEn: 'Doors: building & mosque room secured', textAr: 'الأبواب: المبنى وغرفة المسجد مؤمنة' }
+            ],
+            cctv: [
+                { id: 'c1', textEn: 'All CCTV cameras operational & clear', textAr: 'جميع كاميرات المراقبة تعمل وواضحة' },
+                { id: 'c2', textEn: 'Recording active, backup available', textAr: 'التسجيل نشط، نسخة احتياطية متوفرة' },
+                { id: 'c3', textEn: 'No active CCTV alarms (all investigated)', textAr: 'لا إنذارات CCTV نشطة (تم التحقيق)' },
+                { id: 'c4', textEn: 'NVR/DVR operational, server room clean', textAr: 'NVR/DVR يعمل، غرفة الخادم نظيفة' },
+                { id: 'c5', textEn: 'Server room AC (one running), temp OK', textAr: 'مكيف غرفة الخادم (واحد يعمل)، درجة الحرارة جيدة' },
+                { id: 'c6', textEn: 'UPS operational, no alarms, battery OK', textAr: 'UPS يعمل، لا إنذارات، البطارية جيدة' },
+                { id: 'c7', textEn: 'EDG room clean, no leaks, fuel adequate', textAr: 'غرفة EDG نظيفة، لا تسريبات، الوقود كافٍ' },
+                { id: 'c8', textEn: 'Fire alarm panel normal, extinguishers OK', textAr: 'لوحة إنذار الحريق طبيعية، الطفايات جيدة' },
+                { id: 'c9', textEn: 'Access control: doors secured (Server, UPS, EDG)', textAr: 'التحكم بالوصول: الأبواب مؤمنة (سيرفر، UPS، EDG)' },
+                { id: 'c10', textEn: 'ID station / card printer operational', textAr: 'محطة الهوية / طابعة البطاقات تعمل' },
+                { id: 'c11', textEn: 'Visitor access records maintained', textAr: 'سجلات دخول الزوار محفوظة' },
+                { id: 'c12', textEn: 'Housekeeping satisfactory (no clutter)', textAr: 'النظافة مرضية (لا فوضى)' }
+            ]
+        };
+
+        // ============================================================
+        // BUILD CHECKLIST UI
+        // ============================================================
+        function buildChecklist(tabKey, containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            container.innerHTML = '';
+            const items = itemsData[tabKey];
+            const checklist = state[tabKey];
+            const isLocked = checklist.status === 'submitted' || checklist.status === 'approved' || checklist.status ===
+                'rejected';
+
+            items.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'check-item';
+                div.dataset.itemId = item.id;
+
+                const qSpan = document.createElement('span');
+                qSpan.className = 'q';
+                qSpan.textContent = lang === 'en' ? item.textEn : item.textAr;
+                div.appendChild(qSpan);
+
+                const statusGroup = document.createElement('div');
+                statusGroup.className = 'status-group';
+                ['Yes', 'No', 'N/A'].forEach(opt => {
+                    const label = document.createElement('label');
+                    const radio = document.createElement('input');
+                    radio.type = 'radio';
+                    radio.name = item.id + '_status';
+                    radio.value = opt.toLowerCase();
+                    radio.disabled = isLocked;
+                    // Set default checked
+                    const savedValue = checklist.items[item.id]?.value || 'yes';
+                    if (opt.toLowerCase() === savedValue) {
+                        radio.checked = true;
+                    }
+                    label.appendChild(radio);
+                    label.appendChild(document.createTextNode(opt));
+                    statusGroup.appendChild(label);
+                });
+                div.appendChild(statusGroup);
+
+                const remark = document.createElement('input');
+                remark.className = 'remark-input';
+                remark.placeholder = lang === 'en' ? 'Remarks / action' : 'ملاحظات / إجراء';
+                remark.type = 'text';
+                remark.dataset.remarkFor = item.id;
+                remark.disabled = isLocked;
+                if (checklist.items[item.id] && checklist.items[item.id].remark) {
+                    remark.value = checklist.items[item.id].remark;
+                }
+                div.appendChild(remark);
+
+                const photoDiv = document.createElement('div');
+                photoDiv.className = 'photo-upload';
+                const fileLabel = document.createElement('label');
+                fileLabel.innerHTML =
+                    `<i class="fas fa-camera"></i> ${lang === 'en' ? 'Upload evidence' : 'رفع دليل'}`;
+                fileLabel.style.opacity = isLocked ? '0.5' : '1';
+                const fileInput = document.createElement('input');
+                fileInput.type = 'file';
+                fileInput.accept = 'image/*';
+                fileInput.dataset.photoFor = item.id;
+                fileInput.disabled = isLocked;
+                fileLabel.appendChild(fileInput);
+                photoDiv.appendChild(fileLabel);
+
+                const previewDiv = document.createElement('div');
+                previewDiv.className = 'photo-preview';
+                previewDiv.id = 'preview_' + tabKey + '_' + item.id;
+                photoDiv.appendChild(previewDiv);
+                div.appendChild(photoDiv);
+                container.appendChild(div);
+
+                // Restore photo if exists
+                if (checklist.items[item.id] && checklist.items[item.id].photo) {
+                    const preview = document.getElementById('preview_' + tabKey + '_' + item.id);
+                    if (preview) {
+                        preview.innerHTML = '';
+                        const img = document.createElement('img');
+                        img.src = checklist.items[item.id].photo;
+                        preview.appendChild(img);
+                    }
+                }
+
+                // File input handler
+                fileInput.addEventListener('change', function (e) {
+                    if (isLocked) return;
+                    const file = e.target.files[0];
+                    if (!file) return;
+                    const reader = new FileReader();
+                    reader.onload = function (ev) {
+                        const preview = document.getElementById('preview_' + tabKey + '_' + item.id);
+                        if (preview) {
+                            preview.innerHTML = '';
+                            const img = document.createElement('img');
+                            img.src = ev.target.result;
+                            preview.appendChild(img);
+                        }
+                        if (!checklist.items[item.id]) checklist.items[item.id] = {};
+                        checklist.items[item.id].photo = ev.target.result;
+                        saveState();
+                    };
+                    reader.readAsDataURL(file);
+                });
+
+                // Radio change handler
+                statusGroup.querySelectorAll('input[type="radio"]').forEach(radio => {
+                    radio.addEventListener('change', function () {
+                        if (isLocked) return;
+                        if (!checklist.items[item.id]) checklist.items[item.id] = {};
+                        checklist.items[item.id].value = this.value;
+                        saveState();
+                    });
+                });
+
+                // Remark input handler
+                remark.addEventListener('input', function () {
+                    if (isLocked) return;
+                    if (!checklist.items[item.id]) checklist.items[item.id] = {};
+                    checklist.items[item.id].remark = this.value;
+                    saveState();
+                });
+            });
+        }
+
+        // ============================================================
+        // UPDATE UI STATE
+        // ============================================================
+        function updateChecklistUI(tabKey) {
+            const checklist = state[tabKey];
+            const badge = document.getElementById(tabKey + 'StatusBadge');
+            if (badge) {
+                badge.className = 'badge-status';
+                const statusMap = {
+                    'pending': { cls: 'badge-pending', text: 'Pending' },
+                    'submitted': { cls: 'badge-submitted', text: 'Submitted' },
+                    'approved': { cls: 'badge-approved', text: 'Approved ✓' },
+                    'rejected': { cls: 'badge-rejected', text: 'Rejected ✗' }
+                };
+                const status = statusMap[checklist.status] || statusMap['pending'];
+                badge.classList.add(status.cls);
+                badge.textContent = status.text;
+            }
+
+            const reviewerInput = document.getElementById(tabKey + 'Reviewer');
+            const commentInput = document.getElementById(tabKey + 'ReviewComment');
+            const statusSpan = document.getElementById(tabKey + 'ReviewStatus');
+            if (reviewerInput) reviewerInput.value = checklist.reviewer || '';
+            if (commentInput) commentInput.value = checklist.comment || '';
+            if (statusSpan) {
+                const statusMap = {
+                    'pending': 'Awaiting submission',
+                    'submitted': 'Submitted - Awaiting review',
+                    'approved': '✓ Approved by ' + (checklist.reviewer || 'Supervisor'),
+                    'rejected': '✗ Rejected by ' + (checklist.reviewer || 'Supervisor')
+                };
+                statusSpan.textContent = statusMap[checklist.status] || statusMap['pending'];
+            }
+
+            const card = document.getElementById(tabKey + 'Card');
+            if (card) {
+                const submitBtn = card.querySelector('[data-submit]');
+                const resetBtn = card.querySelector('[data-reset]');
+                const isLocked = checklist.status === 'submitted' || checklist.status === 'approved' || checklist.status ===
+                    'rejected';
+
+                if (submitBtn) {
+                    submitBtn.disabled = isLocked || checklist.status === 'submitted';
+                    const textMap = {
+                        'pending': 'Submit for Review',
+                        'submitted': 'Submitted ✓',
+                        'approved': 'Approved ✓',
+                        'rejected': 'Rejected ✗'
+                    };
+                    submitBtn.textContent = textMap[checklist.status] || 'Submit for Review';
+                }
+
+                // Disable all inputs in the card
+                const inputs = card.querySelectorAll('input[type="radio"], input[type="text"], input[type="file"]');
+                inputs.forEach(inp => { inp.disabled = isLocked; });
+                const labels = card.querySelectorAll('.photo-upload label');
+                labels.forEach(lbl => { lbl.style.opacity = isLocked ? '0.5' : '1'; });
+            }
+        }
+
+        // ============================================================
+        // RESTORE TO DOM
+        // ============================================================
+        function restoreToDOM(tabKey) {
+            const container = document.getElementById(tabKey + 'Items');
+            if (!container) return;
+            const checklist = state[tabKey];
+            const items = itemsData[tabKey];
+
+            items.forEach(item => {
+                const st = checklist.items[item.id];
+                if (!st) return;
+                const radios = container.querySelectorAll(`input[name="${item.id}_status"]`);
+                radios.forEach(r => {
+                    if (r.value === st.value) r.checked = true;
+                });
+                const remarkInput = container.querySelector(`input[data-remark-for="${item.id}"]`);
+                if (remarkInput) remarkInput.value = st.remark || '';
+                if (st.photo) {
+                    const preview = document.getElementById('preview_' + tabKey + '_' + item.id);
+                    if (preview && preview.children.length === 0) {
+                        const img = document.createElement('img');
+                        img.src = st.photo;
+                        preview.appendChild(img);
+                    }
+                }
+            });
+
+            // Restore guard fields
+            const guardMap = {
+                patrol: ['patrolDriver', 'patrolGuard', 'patrolShift'],
+                gate: ['gateGuard', 'gateShift'],
+                cctv: ['cctvGuard', 'cctvShift']
+            };
+            const fields = guardMap[tabKey] || [];
+            fields.forEach(fid => {
+                const el = document.getElementById(fid);
+                if (el && checklist.guardFields[fid] !== undefined) {
+                    el.value = checklist.guardFields[fid];
+                }
+            });
+
+            updateChecklistUI(tabKey);
+        }
+
+        // ============================================================
+        // HEADER FIELDS
+        // ============================================================
+        function updateHeaderFields() {
+            const dateInput = document.getElementById('reportDate');
+            const timeInput = document.getElementById('reportTime');
+            if (state.header.date) dateInput.value = state.header.date;
+            if (state.header.time) timeInput.value = state.header.time;
+        }
+
+        function initHeader() {
+            const dateInput = document.getElementById('reportDate');
+            const timeInput = document.getElementById('reportTime');
+            const now = new Date();
+            if (!dateInput.value) dateInput.value = now.toISOString().slice(0, 10);
+            if (!timeInput.value) timeInput.value = now.toTimeString().slice(0, 5);
+            if (state.header.date) dateInput.value = state.header.date;
+            if (state.header.time) timeInput.value = state.header.time;
+
+            dateInput.addEventListener('change', function () {
+                state.header.date = this.value;
+                saveState();
+            });
+            timeInput.addEventListener('change', function () {
+                state.header.time = this.value;
+                saveState();
+            });
+        }
+
+        // ============================================================
+        // SUBMIT
+        // ============================================================
+        function submitChecklist(tabKey) {
+            const checklist = state[tabKey];
+            if (checklist.status === 'submitted' || checklist.status === 'approved' || checklist.status === 'rejected') {
+                alert('This checklist is already ' + checklist.status);
+                return;
+            }
+
+            // Validate guard fields
+            const guardMap = {
+                patrol: ['patrolDriver', 'patrolGuard', 'patrolShift'],
+                gate: ['gateGuard', 'gateShift'],
+                cctv: ['cctvGuard', 'cctvShift']
+            };
+            const fields = guardMap[tabKey] || [];
+            let missing = false;
+            fields.forEach(fid => {
+                const el = document.getElementById(fid);
+                if (el) {
+                    checklist.guardFields[fid] = el.value;
+                    if (!el.value.trim()) missing = true;
+                }
+            });
+
+            if (missing) {
+                alert('Please fill in all guard name and shift fields before submitting.');
+                return;
+            }
+
+            checklist.status = 'submitted';
+            state.reviewQueue.push({ tabKey, submittedAt: new Date().toISOString() });
+            saveState();
+            updateChecklistUI(tabKey);
+            updateGeneralTab();
+            updateSupervisorQueue();
+            alert('Checklist submitted for supervisor review.');
+        }
+
+        // ============================================================
+        // REVIEW
+        // ============================================================
+        function reviewChecklist(tabKey, action) {
+            const checklist = state[tabKey];
+            if (checklist.status !== 'submitted') {
+                alert('This checklist is not in submitted state.');
+                return;
+            }
+            const supName = document.getElementById('supName').value.trim() || 'Supervisor';
+            const comment = prompt('Enter review comments:', '');
+            if (comment === null) return;
+            checklist.reviewer = supName;
+            checklist.comment = comment || 'No comments';
+            checklist.status = action;
+            state.reviewQueue = state.reviewQueue.filter(q => q.tabKey !== tabKey);
+            saveState();
+            updateChecklistUI(tabKey);
+            updateGeneralTab();
+            updateSupervisorQueue();
+            alert('Checklist ' + action + ' by ' + supName);
+        }
+
+        // ============================================================
+        // GENERAL TAB
+        // ============================================================
+        function updateGeneralTab() {
+            const container = document.getElementById('generalList');
+            if (!container) return;
+            const allKeys = ['patrol', 'gate', 'cctv'];
+            const entries = allKeys.filter(k => state[k].status === 'approved' || state[k].status === 'rejected');
+
+            if (entries.length === 0) {
+                container.innerHTML =
+                    '<div class="empty-state"><i class="fas fa-info-circle"></i> No finalized checklists yet. Submitted checklists will appear here after supervisor review.</div>';
+                return;
+            }
+
+            container.innerHTML = '';
+            const titleMap = { patrol: 'Patrol', gate: 'Main Gate', cctv: 'CCTV' };
+
+            entries.forEach(key => {
+                const cl = state[key];
+                const div = document.createElement('div');
+                div.className = 'preview-card';
+                const statusLabel = cl.status === 'approved' ? '✅ Approved' : '❌ Rejected';
+                div.innerHTML = `
+                    <div class="info">
+                        <strong><i class="fas fa-file-alt"></i> ${titleMap[key]} Checklist</strong>
+                        <span class="badge-status ${cl.status === 'approved' ? 'badge-approved' : 'badge-rejected'}">${statusLabel}</span>
+                        <span><i class="fas fa-user-tie"></i> ${cl.reviewer || 'N/A'}</span>
+                        <span><i class="fas fa-comment"></i> ${cl.comment || 'No comments'}</span>
+                        <span><i class="far fa-calendar-alt"></i> ${document.getElementById('reportDate').value || 'N/A'}</span>
+                    </div>
+                    <div class="actions">
+                        <button class="btn-sm btn-sm-view" data-preview="${key}"><i class="fas fa-eye"></i> Preview</button>
+                        <button class="btn-sm btn-sm-pdf" data-pdf-general="${key}"><i class="fas fa-file-pdf"></i> PDF</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+
+            container.querySelectorAll('[data-preview]').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const key = this.dataset.preview;
+                    openModal(key);
+                });
+            });
+
+            container.querySelectorAll('[data-pdf-general]').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const key = this.dataset.pdfGeneral;
+                    generatePDF(key);
+                });
+            });
+        }
+
+        // ============================================================
+        // SUPERVISOR QUEUE
+        // ============================================================
+        function updateSupervisorQueue() {
+            const container = document.getElementById('supervisorQueue');
+            if (!container) return;
+
+            if (state.reviewQueue.length === 0) {
+                container.innerHTML =
+                    '<div class="empty-state"><i class="fas fa-check-circle"></i> No checklists awaiting review.</div>';
+                return;
+            }
+
+            container.innerHTML = '';
+            const titleMap = { patrol: 'Patrol', gate: 'Main Gate', cctv: 'CCTV' };
+
+            state.reviewQueue.forEach((q) => {
+                const cl = state[q.tabKey];
+                const div = document.createElement('div');
+                div.className = 'preview-card';
+                const guardName = cl.guardFields[Object.keys(cl.guardFields)[0]] || 'N/A';
+                div.innerHTML = `
+                    <div class="info">
+                        <strong><i class="fas fa-clock"></i> ${titleMap[q.tabKey]} Checklist</strong>
+                        <span class="badge-status badge-submitted">Submitted</span>
+                        <span><i class="fas fa-calendar"></i> ${new Date(q.submittedAt).toLocaleString()}</span>
+                        <span><i class="fas fa-user"></i> ${guardName}</span>
+                    </div>
+                    <div class="actions">
+                        <button class="btn-sm btn-sm-view" data-preview-queue="${q.tabKey}"><i class="fas fa-eye"></i> Preview</button>
+                        <button class="btn-approve" data-review="${q.tabKey}" data-action="approved"><i class="fas fa-check"></i> Approve</button>
+                        <button class="btn-reject" data-review="${q.tabKey}" data-action="rejected"><i class="fas fa-times"></i> Reject</button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+
+            container.querySelectorAll('[data-preview-queue]').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const key = this.dataset.previewQueue;
+                    openModal(key);
+                });
+            });
+
+            container.querySelectorAll('[data-review]').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const key = this.dataset.review;
+                    const action = this.dataset.action;
+                    reviewChecklist(key, action);
+                });
+            });
+        }
+
+        // ============================================================
+        // MODAL
+        // ============================================================
+        function openModal(tabKey) {
+            const modal = document.getElementById('previewModal');
+            const body = document.getElementById('modalBody');
+            const title = document.getElementById('modalTitle');
+            const pdfBtn = document.getElementById('modalPdfBtn');
+            modalTargetKey = tabKey;
+
+            const checklist = state[tabKey];
+            const titleMap = { patrol: 'Patrol', gate: 'Main Gate', cctv: 'CCTV' };
+            title.innerHTML = `<i class="fas fa-file-alt"></i> ${titleMap[tabKey]} Checklist (Read-only)`;
+
+            body.innerHTML = '';
+            const items = itemsData[tabKey];
+
+            items.forEach(item => {
+                const st = checklist.items[item.id] || { value: 'yes', remark: '', photo: '' };
+                const div = document.createElement('div');
+                div.className = 'check-item';
+                div.style.padding = '6px 0';
+
+                const qSpan = document.createElement('span');
+                qSpan.className = 'q';
+                qSpan.textContent = lang === 'en' ? item.textEn : item.textAr;
+                div.appendChild(qSpan);
+
+                const statusSpan = document.createElement('span');
+                statusSpan.style.fontWeight = '600';
+                statusSpan.style.color = st.value === 'yes' ? '#1c7e3a' : (st.value === 'no' ? '#b13e3e' : '#6f7d92');
+                statusSpan.textContent = st.value.toUpperCase();
+                div.appendChild(statusSpan);
+
+                if (st.remark) {
+                    const remSpan = document.createElement('span');
+                    remSpan.style.color = '#4b6f8f';
+                    remSpan.style.fontSize = '13px';
+                    remSpan.textContent = '📝 ' + st.remark;
+                    div.appendChild(remSpan);
+                }
+
+                if (st.photo) {
+                    const img = document.createElement('img');
+                    img.src = st.photo;
+                    img.style.width = '50px';
+                    img.style.height = '50px';
+                    img.style.objectFit = 'cover';
+                    img.style.borderRadius = '8px';
+                    img.style.border = '1px solid #bcd0e5';
+                    div.appendChild(img);
+                }
+                body.appendChild(div);
+            });
+
+            const note = document.createElement('p');
+            note.style.marginTop = '10px';
+            note.style.padding = '8px 14px';
+            note.style.background = '#e8f0f9';
+            note.style.borderRadius = '10px';
+            note.style.color = '#1f3b57';
+            note.style.fontSize = '13px';
+            note.innerHTML = '<i class="fas fa-info-circle"></i> This is a read-only preview.';
+            body.appendChild(note);
+
+            pdfBtn.onclick = function () {
+                generatePDF(tabKey);
+            };
+            modal.classList.add('open');
+        }
+
+        function closeModal() {
+            document.getElementById('previewModal').classList.remove('open');
+            modalTargetKey = null;
+        }
+
+        // ============================================================
+        // PDF GENERATION
+        // ============================================================
+        function generatePDF(tabKey) {
+            const card = document.getElementById(tabKey + 'Card');
+            if (!card) { alert('Card not found'); return; }
+            const clone = card.cloneNode(true);
+            clone.querySelectorAll('.tab-footer, .btn-pdf, .btn-submit, .btn-reset, .photo-upload input, .photo-upload label')
+                .forEach(el => el.remove());
+            clone.querySelectorAll('.badge-status').forEach(b => {
+                const span = document.createElement('span');
+                span.textContent = b.textContent;
+                span.style.fontWeight = 'bold';
+                b.parentNode.replaceChild(span, b);
+            });
+            clone.querySelectorAll('.signature-row input').forEach(inp => {
+                const val = inp.value || '______';
+                const label = inp.closest('label');
+                if (label) {
+                    label.innerHTML = label.textContent.replace(/input.*/, '') + ' <strong>' + val + '</strong>';
+                }
+            });
+            const reviewSection = clone.querySelector('.review-section');
+            if (reviewSection) {
+                reviewSection.querySelectorAll('input, textarea').forEach(inp => {
+                    const val = inp.value || '______';
+                    const span = document.createElement('span');
+                    span.textContent = val;
+                    span.style.fontWeight = '500';
+                    inp.parentNode.replaceChild(span, inp);
+                });
+            }
+            clone.querySelectorAll('.photo-preview').forEach(preview => {
+                if (preview.children.length === 0) {
+                    const empty = document.createElement('span');
+                    empty.textContent = 'No photo';
+                    empty.style.color = '#999';
+                    empty.style.fontSize = '12px';
+                    preview.appendChild(empty);
+                }
+            });
+            const dateVal = document.getElementById('reportDate').value || new Date().toISOString().slice(0, 10);
+            const timeVal = document.getElementById('reportTime').value || new Date().toTimeString().slice(0, 5);
+            const titleMap = { patrol: 'Patrol Vehicle & Team', gate: 'Main Gate & Access', cctv: 'CCTV & Technical' };
+            const h2 = clone.querySelector('h2');
+            if (h2) {
+                const status = state[tabKey].status;
+                const statusText = status === 'approved' ? '✅ APPROVED' : (status === 'rejected' ? '❌ REJECTED' : '');
+                h2.innerHTML =
+                    `<i class="fas fa-file-pdf"></i> ${titleMap[tabKey]} · ${dateVal} ${timeVal} ${statusText}`;
+            }
+            const headerDiv = document.createElement('div');
+            headerDiv.style.cssText =
+                'background:#0b2a44;color:white;padding:12px 20px;border-radius:12px;margin-bottom:14px;font-weight:600;font-size:16px;text-align:center;';
+            headerDiv.textContent = '1100 MW AL HENAKIYAH SOLAR PHOTOVOLTAIC INDEPENDENT POWER PLANT';
+            clone.prepend(headerDiv);
+
+            const opt = {
+                margin: [0.5, 0.5, 0.5, 0.5],
+                filename: `CAHK_${tabKey}_${dateVal}.pdf`,
+                image: { type: 'jpeg', quality: 0.92 },
+                html2canvas: { scale: 2, useCORS: true, logging: false },
+                jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(clone).save();
+        }
+
+        // ============================================================
+        // TAB SWITCHING
+        // ============================================================
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            const target = document.getElementById(tabId);
+            if (target) target.classList.add('active');
+            const btn = document.querySelector(`.tab-btn[data-tab="${tabId}"]`);
+            if (btn) btn.classList.add('active');
+            if (tabId === 'tabGeneral') updateGeneralTab();
+            if (tabId === 'tabSupervisor') updateSupervisorQueue();
+        }
+
+        // ============================================================
+        // LANGUAGE
+        // ============================================================
+        function updateLanguage(newLang) {
+            lang = newLang;
+            document.getElementById('appWrapper').classList.toggle('rtl', lang === 'ar');
+            ['patrol', 'gate', 'cctv'].forEach(key => {
+                buildChecklist(key, key + 'Items');
+                restoreToDOM(key);
+            });
+            document.querySelectorAll('.remark-input').forEach(inp => {
+                inp.placeholder = lang === 'en' ? 'Remarks / action' : 'ملاحظات / إجراء';
+            });
+            document.querySelectorAll('.photo-upload label').forEach(lbl => {
+                const icon = lbl.querySelector('i');
+                if (icon) {
+                    lbl.innerHTML =
+                        `<i class="fas fa-camera"></i> ${lang === 'en' ? 'Upload evidence' : 'رفع دليل'}`;
+                    lbl.appendChild(lbl.querySelector('input[type="file"]'));
+                }
+            });
+        }
+
+        // ============================================================
+        // EVENT BINDING
+        // ============================================================
+        document.addEventListener('click', function (e) {
+            const tabBtn = e.target.closest('.tab-btn');
+            if (tabBtn) {
+                const tabId = tabBtn.dataset.tab;
+                if (tabId) switchTab(tabId);
+            }
+
+            const resetBtn = e.target.closest('[data-reset]');
+            if (resetBtn) {
+                const key = resetBtn.dataset.reset;
+                if (key && confirm('Reset all data in this checklist?')) {
+                    state[key] = getDefaultChecklist();
+                    state.reviewQueue = state.reviewQueue.filter(q => q.tabKey !== key);
+                    saveState();
+                    buildChecklist(key, key + 'Items');
+                    restoreToDOM(key);
+                    updateGeneralTab();
+                    updateSupervisorQueue();
+                    alert('Checklist reset.');
+                }
+            }
+
+            const submitBtn = e.target.closest('[data-submit]');
+            if (submitBtn) {
+                const key = submitBtn.dataset.submit;
+                if (key) submitChecklist(key);
+            }
+
+            if (e.target.closest('#closeModal') || e.target.closest('#modalCloseBtn')) {
+                closeModal();
+            }
+            if (e.target === document.getElementById('previewModal')) {
+                closeModal();
+            }
+            if (e.target.id === 'modalPdfBtn' && modalTargetKey) {
+                generatePDF(modalTargetKey);
+            }
+        });
+
+        // Language toggle
+        document.getElementById('langToggle').addEventListener('click', function (e) {
+            const btn = e.target.closest('button');
+            if (!btn) return;
+            const newLang = btn.dataset.lang;
+            if (!newLang) return;
+            this.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            updateLanguage(newLang);
+        });
+
+        // ============================================================
+        // INIT
+        // ============================================================
+        function init() {
+            // Load from Firebase first if available
+            if (syncEnabled && firebaseInitialized) {
+                loadFromFirebase();
+                // Set up real-time listener
+                listenFirebaseUpdates();
+            }
+
+            initHeader();
+            ['patrol', 'gate', 'cctv'].forEach(key => {
+                buildChecklist(key, key + 'Items');
+                restoreToDOM(key);
+            });
+
+            // Set default shifts
+            if (!state.patrol.guardFields.patrolShift) {
+                document.getElementById('patrolShift').value = 'Day';
+                state.patrol.guardFields.patrolShift = 'Day';
+            }
+            if (!state.gate.guardFields.gateShift) {
+                document.getElementById('gateShift').value = 'Day';
+                state.gate.guardFields.gateShift = 'Day';
+            }
+            if (!state.cctv.guardFields.cctvShift) {
+                document.getElementById('cctvShift').value = 'Day';
+                state.cctv.guardFields.cctvShift = 'Day';
+            }
+
+            updateGeneralTab();
+            updateSupervisorQueue();
+            switchTab('tabPatrol');
+            saveState();
+
+            // Auto-sync every 30 seconds
+            if (syncEnabled && firebaseInitialized) {
+                syncInterval = setInterval(() => {
+                    syncToFirebase();
+                }, 30000);
+            }
+        }
+
+        init();
+    </script>
+</body>
+
+</html>
